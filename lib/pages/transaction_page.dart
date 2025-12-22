@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:money_tracker/models/category.dart';
+import 'package:money_tracker/models/database.dart';
+
 
 class TransactionPage extends StatefulWidget {
   const TransactionPage({super.key});
@@ -10,10 +13,50 @@ class TransactionPage extends StatefulWidget {
 }
 
 class _TransactionPageState extends State<TransactionPage> {
+  final AppDb database = AppDb();
   bool isExpense = true;
+  late int type;
   List<String> list = ['Makan dan Jajan', 'Transportasi', 'Nonton Film'];
   late String dropDownValue = list.first;
+  TextEditingController amountController = TextEditingController();
   TextEditingController dateController = TextEditingController();
+  //Dimas (detail databasenya kita pakai (name))
+  TextEditingController detailController = TextEditingController();
+  Category? selectedCategory;
+
+  Future insert(
+  int amount,
+  DateTime date,
+  String detail,
+  int categoryId,
+  ) async {
+    //Dimas (ada insert ke database)
+  DateTime now = DateTime.now();
+  final row = await database
+      .into(database.transactions)
+      .insertReturning(
+        TransactionsCompanion.insert(
+          name: detail,
+          Category_id: categoryId,
+          transaction_date: date,
+          amount: amount,
+          createdAt: now,
+          updatedAt: now));
+          print('APA INI : ' + row.toString());
+
+  }
+
+  Future<List<Category>> getAllCategory(int type) async {
+    return await database.getAllCategoryRepo(type);
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    type = 2;
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,6 +73,8 @@ class _TransactionPageState extends State<TransactionPage> {
                     onChanged: (bool value) {
                       setState(() {
                         isExpense = value;
+                        type = (isExpense) ? 2 : 1;
+                        selectedCategory = null;
                       });
                     },
                     inactiveTrackColor: Colors.green,
@@ -46,6 +91,7 @@ class _TransactionPageState extends State<TransactionPage> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: TextFormField(
+                  controller: amountController,
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     border: UnderlineInputBorder(),
@@ -61,25 +107,52 @@ class _TransactionPageState extends State<TransactionPage> {
                   style: GoogleFonts.montserrat(fontSize: 16),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: DropdownButton<String>(
-                  value: dropDownValue,
-                  isExpanded: true,
-                  icon: Icon(Icons.arrow_downward),
-                  items: list.map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
-                  onChanged: (String? value) {},
-                ),
+              //Dimas (function untuk kueri ke database)
+              FutureBuilder<List<Category>>(
+                future: getAllCategory(type),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  } else {
+                    if (snapshot.hasData) {
+                      if (snapshot.data!.length > 0) {
+                        selectedCategory == snapshot.data!.first;
+                        print('APANIH : ' + snapshot.toString());
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: DropdownButton<Category>(
+                            value: (selectedCategory == null)
+                                ? snapshot.data!.first
+                                : selectedCategory,
+                            isExpanded: true,
+                            icon: Icon(Icons.arrow_downward),
+                            items: snapshot.data!.map((Category item) {
+                              return DropdownMenuItem<Category>(
+                                value: item,
+                                child: Text(item.name),
+                              );
+                            }).toList(),
+                            onChanged: (Category? value) {
+                              setState(() {
+                                selectedCategory = value;
+                              });
+                            },
+                          ),
+                        );
+                      } else {
+                        return Center(child: Text("Data Kosong"));
+                      }
+                    } else {
+                      return Center(child: Text("Tidak Ada Data"));
+                    }
+                  }
+                },
               ),
+
               SizedBox(height: 25),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: TextField(
+                child: TextFormField(
                   readOnly: true,
                   controller: dateController,
                   decoration: InputDecoration(labelText: "Enter date"),
@@ -89,18 +162,43 @@ class _TransactionPageState extends State<TransactionPage> {
                       initialDate: DateTime.now(),
                       firstDate: DateTime(2020),
                       lastDate: DateTime(2099),
-                    
                     );
                     if (pickedDate != null) {
-                      String  formatteDate = DateFormat('yyyy-mm-dd').format(pickedDate);
-                
+                      String formatteDate = DateFormat(
+                        'yyyy-mm-dd',
+                      ).format(pickedDate);
+
                       dateController.text = formatteDate;
                     }
                   },
                 ),
               ),
-              SizedBox(height: 25,),
-              Center(child: ElevatedButton(onPressed: () {}, child: Text("Save")),)
+              //Dimas (input detail)
+              SizedBox(height: 10),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: TextFormField(
+                  controller: detailController,
+                  decoration: InputDecoration(
+                    border: UnderlineInputBorder(),
+                    labelText: "Detail",
+                  ),
+                ),
+              ),
+              SizedBox(height: 25),
+              Center(
+                child: ElevatedButton(
+                  onPressed: () {
+                    insert(
+                      int.parse(amountController.text),
+                      DateTime.parse(dateController.text),
+                      detailController.text,
+                      selectedCategory!.id,
+                    );
+                  },
+                  child: Text("Save"),
+                ),
+              ),
             ],
           ),
         ),
