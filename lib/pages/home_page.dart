@@ -122,6 +122,7 @@ class _HomePageState extends State<HomePage> {
                   if (snapshot.hasData) {
                     if (snapshot.data!.length > 0) {
                       return ListView.builder(
+                        shrinkWrap: true,
                         itemCount: snapshot.data!.length,
                         itemBuilder: (context, index) {
                           return Padding(
@@ -137,8 +138,8 @@ class _HomePageState extends State<HomePage> {
                                     Icon(Icons.edit),
                                   ],
                                 ),
-                                title: Text("Rp. 20.000"),
-                                subtitle: Text("Makan Siang"),
+                                title: Text("Rp. ${snapshot.data![index].transaction.amount.toString()}"),
+                                subtitle: Text(snapshot.data![index].category.name + "(" + snapshot.data![index].transaction.name + ")"),
                                 leading: Container(
                                   child: Icon(Icons.upload, color: Colors.red),
                                   decoration: BoxDecoration(
