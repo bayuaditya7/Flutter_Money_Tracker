@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import 'package:money_tracker/models/category.dart';
 import 'package:money_tracker/models/database.dart';
 
-
 class TransactionPage extends StatefulWidget {
   const TransactionPage({super.key});
 
@@ -23,32 +22,35 @@ class _TransactionPageState extends State<TransactionPage> {
   //Dimas (detail databasenya kita pakai (name))
   TextEditingController detailController = TextEditingController();
   Category? selectedCategory;
+  //Dimas end
 
   Future insert(
-  int amount,
-  DateTime date,
-  String detail,
-  int categoryId,
+    int amount,
+    DateTime date,
+    String detail,
+    int categoryId,
   ) async {
     //Dimas (ada insert ke database)
-  DateTime now = DateTime.now();
-  final row = await database
-      .into(database.transactions)
-      .insertReturning(
-        TransactionsCompanion.insert(
-          name: detail,
-          Category_id: categoryId,
-          transaction_date: date,
-          amount: amount,
-          createdAt: now,
-          updatedAt: now));
-          print('APA INI : ' + row.toString());
-
+    DateTime now = DateTime.now();
+    final row = await database
+        .into(database.transactions)
+        .insertReturning(
+          TransactionsCompanion.insert(
+            name: detail,
+            Category_id: categoryId,
+            transaction_date: date,
+            amount: amount,
+            createdAt: now,
+            updatedAt: now,
+          ),
+        );
+    print('APA INI : ' + row.toString());
   }
 
   Future<List<Category>> getAllCategory(int type) async {
     return await database.getAllCategoryRepo(type);
   }
+  //Dimas end
 
   @override
   void initState() {
@@ -149,6 +151,7 @@ class _TransactionPageState extends State<TransactionPage> {
                 },
               ),
 
+              //Dimas end
               SizedBox(height: 25),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -195,6 +198,7 @@ class _TransactionPageState extends State<TransactionPage> {
                       detailController.text,
                       selectedCategory!.id,
                     );
+                    Navigator.pop(context, true);
                   },
                   child: Text("Save"),
                 ),
