@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:money_tracker/models/category.dart';
 import 'package:money_tracker/models/database.dart';
 
 class TransactionPage extends StatefulWidget {
@@ -37,14 +36,13 @@ class _TransactionPageState extends State<TransactionPage> {
         .insertReturning(
           TransactionsCompanion.insert(
             name: detail,
-            Category_id: categoryId,
+            category_id: categoryId,
             transaction_date: date,
             amount: amount,
             createdAt: now,
             updatedAt: now,
           ),
         );
-    print('APA INI : ' + row.toString());
   }
 
   Future<List<Category>> getAllCategory(int type) async {
@@ -54,7 +52,6 @@ class _TransactionPageState extends State<TransactionPage> {
 
   @override
   void initState() {
-    // TODO: implement initState
     type = 2;
     super.initState();
   }
@@ -117,7 +114,7 @@ class _TransactionPageState extends State<TransactionPage> {
                     return Center(child: CircularProgressIndicator());
                   } else {
                     if (snapshot.hasData) {
-                      if (snapshot.data!.length > 0) {
+                      if (snapshot.data!.isNotEmpty) {
                         //selected category
                         selectedCategory = (selectedCategory == null) ? snapshot.data!.first : selectedCategory;
                         print('APANIH : ' + snapshot.toString());

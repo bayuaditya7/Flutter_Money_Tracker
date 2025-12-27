@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:money_tracker/pages/main_page.dart';
 
 void main(){
