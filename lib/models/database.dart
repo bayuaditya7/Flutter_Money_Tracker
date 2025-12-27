@@ -33,7 +33,9 @@ class AppDb extends _$AppDb {
   }
 
   //Dimas (CRUD Transaction) list list dengan category
-  Stream<List<TransactionWithCategory>> getTransactionByDateRepo(DateTime date) {
+  Stream<List<TransactionWithCategory>> getTransactionByDateRepo(
+    DateTime date,
+  ) {
     final query = (select(transactions).join([
       innerJoin(categories, categories.id.equalsExp(transactions.category_id)),
     ])..where(transactions.transaction_date.equals(date)));
@@ -45,6 +47,27 @@ class AppDb extends _$AppDb {
         );
       }).toList();
     });
+  }
+
+  //Dimas Update transaction database
+  Future updateTransactionRepo(
+    int id,
+    int amount,
+    int categoryId,
+    DateTime transaction_date,
+    String nameDetail,
+  ) async {
+    return (update(transactions)..where((tbl) => tbl.id.equals(id))).write(
+      TransactionsCompanion(
+        name: Value(nameDetail),
+        amount: Value(amount),
+        category_id: Value(categoryId),
+        transaction_date: Value(transaction_date),
+      ),
+    );
+  }
+    Future deleteTransactionRepo(int id) async {
+    return (delete(transactions)..where((tbl) => tbl.id.equals(id))).go();
   }
 }
 

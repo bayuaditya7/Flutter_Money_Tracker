@@ -1,10 +1,15 @@
+import 'package:flutter/src/foundation/key.dart';
+import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:money_tracker/models/database.dart';
+import 'package:money_tracker/models/transaction_with_category.dart';
 
 class TransactionPage extends StatefulWidget {
-  const TransactionPage({super.key});
+  final TransactionWithCategory? transactionWithCategory;
+  const TransactionPage({Key? key, required this.transactionWithCategory})
+    : super(key: key);
 
   @override
   State<TransactionPage> createState() => _TransactionPageState();
@@ -26,7 +31,7 @@ class _TransactionPageState extends State<TransactionPage> {
   Future insert(
     int amount,
     DateTime date,
-    String detail,
+    String nameDetail,
     int categoryId,
   ) async {
     //Dimas (ada insert ke database)
@@ -35,7 +40,7 @@ class _TransactionPageState extends State<TransactionPage> {
         .into(database.transactions)
         .insertReturning(
           TransactionsCompanion.insert(
-            name: detail,
+            name: nameDetail,
             category_id: categoryId,
             transaction_date: date,
             amount: amount,
@@ -48,12 +53,45 @@ class _TransactionPageState extends State<TransactionPage> {
   Future<List<Category>> getAllCategory(int type) async {
     return await database.getAllCategoryRepo(type);
   }
+
+  Future update(
+    int transactionId,
+    int amount,
+    int categoryId,
+    DateTime transaction_date,
+    String nameDetail,
+  ) async {
+    return await database.updateTransactionRepo(
+      transactionId,
+      amount,
+      categoryId,
+      transaction_date,
+      nameDetail,
+    );
+  }
   //Dimas end
 
   @override
   void initState() {
-    type = 2;
+    if (widget.transactionWithCategory != null) {
+      updateTransactionView(widget.transactionWithCategory!);
+    } else {
+      type = 2;
+    }
     super.initState();
+  }
+
+  //Dimas (updateTransactionView)
+  void updateTransactionView(TransactionWithCategory transactionWithCategory) {
+    amountController.text = transactionWithCategory.transaction.amount
+        .toString();
+    detailController.text = transactionWithCategory.transaction.name;
+    dateController.text = DateFormat(
+      'yyyy-MM-dd',
+    ).format(transactionWithCategory.transaction.transaction_date);
+    type = transactionWithCategory.category.type;
+    (type == 2) ? isExpense = true : isExpense = false;
+    selectedCategory = transactionWithCategory.category;
   }
 
   @override
@@ -116,7 +154,9 @@ class _TransactionPageState extends State<TransactionPage> {
                     if (snapshot.hasData) {
                       if (snapshot.data!.isNotEmpty) {
                         //selected category
-                        selectedCategory = (selectedCategory == null) ? snapshot.data!.first : selectedCategory;
+                        selectedCategory = (selectedCategory == null)
+                            ? snapshot.data!.first
+                            : selectedCategory;
                         print('APANIH : ' + snapshot.toString());
                         return Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -189,13 +229,22 @@ class _TransactionPageState extends State<TransactionPage> {
               SizedBox(height: 25),
               Center(
                 child: ElevatedButton(
-                  onPressed: () {
-                    insert(
-                      int.parse(amountController.text),
-                      DateTime.parse(dateController.text),
-                      detailController.text,
-                      selectedCategory!.id,
-                    );
+                  onPressed: () async {
+                    (widget.transactionWithCategory == null)
+                        ? insert(
+                            int.parse(amountController.text),
+                            DateTime.parse(dateController.text),
+                            detailController.text,
+                            selectedCategory!.id,
+                          )
+                        : await update(
+                            widget.transactionWithCategory!.transaction.id,
+                            int.parse(amountController.text),
+                            selectedCategory!.id,
+                            DateTime.parse(dateController.text),
+                            detailController.text,
+                          );
+                    setState(() {});
                     Navigator.pop(context, true);
                   },
                   child: Text("Save"),

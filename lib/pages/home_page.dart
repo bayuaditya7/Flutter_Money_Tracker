@@ -4,6 +4,7 @@ import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:money_tracker/models/database.dart';
 import 'package:money_tracker/models/transaction_with_category.dart';
+import 'package:money_tracker/pages/transaction_page.dart';
 
 class HomePage extends StatefulWidget {
   final DateTime selectedDate;
@@ -133,15 +134,47 @@ class _HomePageState extends State<HomePage> {
                                 trailing: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(Icons.delete),
+                                    IconButton(icon: Icon(Icons.delete), onPressed: () async {
+                                      await database.deleteTransactionRepo(snapshot.data![index].transaction.id);
+                                      setState(() {
+                                        
+                                      });
+                                    }),
                                     SizedBox(width: 10),
-                                    Icon(Icons.edit),
+                                    //edit button
+                                    IconButton(
+                                      icon: Icon(Icons.edit),
+                                      onPressed: () {
+                                        Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                TransactionPage(
+                                                  transactionWithCategory:
+                                                      snapshot.data![index],
+                                                ),
+                                          ),
+                                        );
+                                      },
+                                    ),
                                   ],
                                 ),
-                                title: Text("Rp. ${snapshot.data![index].transaction.amount.toString()}"),
-                                subtitle: Text(snapshot.data![index].category.name + "(" + snapshot.data![index].transaction.name + ")"),
+                                title: Text(
+                                  "Rp. ${snapshot.data![index].transaction.amount.toString()}",
+                                ),
+                                subtitle: Text(
+                                  snapshot.data![index].category.name +
+                                      "(" +
+                                      snapshot.data![index].transaction.name +
+                                      ")",
+                                ),
                                 leading: Container(
-                                  child: Icon(Icons.upload, color: Colors.red),
+                                  child:
+                                      (snapshot.data![index].category.type == 2)
+                                      ? Icon(
+                                          Icons.download,
+                                          color: Colors.green,
+                                        )
+                                      : Icon(Icons.upload, color: Colors.red),
                                   decoration: BoxDecoration(
                                     color: Colors.white,
                                     borderRadius: BorderRadius.circular(8),
