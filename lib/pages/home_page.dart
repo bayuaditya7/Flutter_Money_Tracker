@@ -144,8 +144,8 @@ class _HomePageState extends State<HomePage> {
                                     //edit button
                                     IconButton(
                                       icon: Icon(Icons.edit),
-                                      onPressed: () {
-                                        Navigator.of(context).push(
+                                      onPressed: () async {
+                                        await Navigator.of(context).push(
                                           MaterialPageRoute(
                                             builder: (context) =>
                                                 TransactionPage(
@@ -154,6 +154,9 @@ class _HomePageState extends State<HomePage> {
                                                 ),
                                           ),
                                         );
+                                        setState(() {
+                                          
+                                        });
                                       },
                                     ),
                                   ],
