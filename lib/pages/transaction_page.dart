@@ -206,7 +206,7 @@ class _TransactionPageState extends State<TransactionPage> {
                     );
                     if (pickedDate != null) {
                       String formatteDate = DateFormat(
-                        'yyyy-mm-dd',
+                        'yyyy-MM-dd',
                       ).format(pickedDate);
 
                       dateController.text = formatteDate;

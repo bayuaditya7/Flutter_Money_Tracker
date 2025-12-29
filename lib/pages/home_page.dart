@@ -171,10 +171,10 @@ class _HomePageState extends State<HomePage> {
                                   child:
                                       (snapshot.data![index].category.type == 2)
                                       ? Icon(
-                                          Icons.download,
-                                          color: Colors.green,
+                                          Icons.upload,
+                                          color: Colors.red,
                                         )
-                                      : Icon(Icons.upload, color: Colors.red),
+                                      : Icon(Icons.download, color: Colors.green),
                                   decoration: BoxDecoration(
                                     color: Colors.white,
                                     borderRadius: BorderRadius.circular(8),
