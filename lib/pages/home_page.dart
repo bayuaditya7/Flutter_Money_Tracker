@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/src/foundation/key.dart';
 import 'package:flutter/src/widgets/framework.dart';
@@ -17,6 +18,13 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   //memanggil database
   final AppDb database = AppDb();
+
+//Dimas (buat formater currency)
+  final NumberFormat formatter = NumberFormat.currency(
+    locale: 'id_ID', 
+    symbol: 'Rp ', 
+    decimalDigits: 0
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -84,7 +92,7 @@ class _HomePageState extends State<HomePage> {
                                         ),
                                       ),
                                       Text(
-                                        "Rp. $incomeTotal",
+                                        formatter.format(incomeTotal),
                                         style: GoogleFonts.montserrat(
                                           color: Colors.white,
                                           fontSize: 14,
@@ -118,7 +126,7 @@ class _HomePageState extends State<HomePage> {
                                         ),
                                       ),
                                       Text(
-                                        "Rp. $expenseTotal",
+                                        formatter.format(expenseTotal),
                                         style: GoogleFonts.montserrat(
                                           color: Colors.white,
                                           fontSize: 14,
@@ -195,7 +203,7 @@ class _HomePageState extends State<HomePage> {
                                     ],
                                   ),
                                   title: Text(
-                                    "Rp. ${snapshot.data![index].transaction.amount.toString()}",
+                                    formatter.format(snapshot.data![index].transaction.amount),
                                   ),
                                   subtitle: Text(
                                     snapshot.data![index].category.name +
