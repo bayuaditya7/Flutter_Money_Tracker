@@ -97,157 +97,264 @@ class _TransactionPageState extends State<TransactionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Add Transaction")),
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Colors.white,
+        iconTheme: IconThemeData(color: Colors.black),
+        title: Text(
+          widget.transactionWithCategory == null
+              ? "Tambah Transaksi"
+              : "Edit Transaksi",
+          style: GoogleFonts.montserrat(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
       body: SingleChildScrollView(
-        child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
-                  Switch(
-                    value: isExpense,
-                    onChanged: (bool value) {
-                      setState(() {
-                        isExpense = value;
-                        type = (isExpense) ? 2 : 1;
-                        selectedCategory = null;
-                      });
-                    },
-                    inactiveTrackColor: Colors.green,
-                    inactiveThumbColor: Colors.green,
-                    activeColor: Colors.red,
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          isExpense = true;
+                          type = 2;
+                          selectedCategory = null;
+                        });
+                      },
+                      child: Container(
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          color: isExpense ? Colors.red : Colors.grey[200],
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(10),
+                            bottomLeft: Radius.circular(10),
+                          ),
+                        ),
+                        child: Center(
+                          child: Text(
+                            "Pengeluaran",
+                            style: GoogleFonts.montserrat(
+                              color: isExpense ? Colors.white : Colors.black54,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
-                  Text(
-                    isExpense ? 'Expense' : 'Income',
-                    style: GoogleFonts.montserrat(fontSize: 14),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          isExpense = false;
+                          type = 1;
+                          selectedCategory = null;
+                        });
+                      },
+                      child: Container(
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          color: !isExpense ? Colors.blue : Colors.grey[200],
+                          borderRadius: BorderRadius.only(
+                            topRight: Radius.circular(10),
+                            bottomRight: Radius.circular(10),
+                          ),
+                        ),
+                        child: Center(
+                          child: Text(
+                            "Pemasukan",
+                            style: GoogleFonts.montserrat(
+                              color: !isExpense ? Colors.white : Colors.black54,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
-              SizedBox(height: 10),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: TextFormField(
-                  controller: amountController,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    border: UnderlineInputBorder(),
-                    labelText: "Amount",
+              SizedBox(height: 30),
+              //Dimas (input amount)
+              Text(
+                "Jumlah (Rp)",
+                style: GoogleFonts.montserrat(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              SizedBox(height: 8),
+              TextField(
+                controller: amountController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  hintText: "0",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
+                  prefixIcon: Icon(Icons.attach_money),
                 ),
               ),
-              SizedBox(height: 25),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  'Category',
-                  style: GoogleFonts.montserrat(fontSize: 16),
+
+              SizedBox(height: 20),
+              //Dimas (input category)
+              Text(
+                "Kategori",
+                style: GoogleFonts.montserrat(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-              //Dimas (function untuk kueri ke database)
+              SizedBox(height: 8),
               FutureBuilder<List<Category>>(
                 future: getAllCategory(type),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                    selectedCategory = (selectedCategory == null)
+                        ? snapshot.data!.first
+                        : selectedCategory;
+                    return Container(
+                      padding: EdgeInsets.symmetric(horizontal: 12),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<Category>(
+                          value: selectedCategory,
+                          isExpanded: true,
+                          icon: Icon(Icons.arrow_drop_down),
+                          items: snapshot.data!.map((Category item) {
+                            return DropdownMenuItem<Category>(
+                              value: item,
+                              child: Text(
+                                item.name,
+                                style: GoogleFonts.montserrat(),
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (Category? value) {
+                            setState(() {
+                              selectedCategory = value;
+                            });
+                          },
+                        ),
+                      ),
+                    );
                   } else {
-                    if (snapshot.hasData) {
-                      if (snapshot.data!.isNotEmpty) {
-                        //selected category
-                        selectedCategory = (selectedCategory == null)
-                            ? snapshot.data!.first
-                            : selectedCategory;
-                        print('APANIH : ' + snapshot.toString());
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: DropdownButton<Category>(
-                            value: (selectedCategory == null)
-                                ? snapshot.data!.first
-                                : selectedCategory,
-                            isExpanded: true,
-                            icon: Icon(Icons.arrow_downward),
-                            items: snapshot.data!.map((Category item) {
-                              return DropdownMenuItem<Category>(
-                                value: item,
-                                child: Text(item.name),
-                              );
-                            }).toList(),
-                            onChanged: (Category? value) {
-                              setState(() {
-                                selectedCategory = value;
-                              });
-                            },
-                          ),
-                        );
-                      } else {
-                        return Center(child: Text("Data Kosong"));
-                      }
-                    } else {
-                      return Center(child: Text("Tidak Ada Data"));
-                    }
+                    return Text(
+                      "Tidak ada kategori",
+                      style: GoogleFonts.montserrat(color: Colors.red),
+                    );
                   }
                 },
               ),
 
-              //Dimas end
-              SizedBox(height: 25),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: TextFormField(
-                  readOnly: true,
-                  controller: dateController,
-                  decoration: InputDecoration(labelText: "Enter date"),
-                  onTap: () async {
-                    DateTime? pickedDate = await showDatePicker(
-                      context: context,
-                      initialDate: DateTime.now(),
-                      firstDate: DateTime(2020),
-                      lastDate: DateTime(2099),
-                    );
-                    if (pickedDate != null) {
-                      String formatteDate = DateFormat(
-                        'yyyy-MM-dd',
-                      ).format(pickedDate);
-
-                      dateController.text = formatteDate;
-                    }
-                  },
+              SizedBox(height: 20),
+              //Dimas (input date)
+              Text(
+                "Tanggal",
+                style: GoogleFonts.montserrat(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
                 ),
+              ),
+              SizedBox(height: 8),
+              TextField(
+                readOnly: true,
+                controller: dateController,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  prefixIcon: Icon(Icons.calendar_today),
+                ),
+                onTap: () async {
+                  DateTime? pickedDate = await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime(2020),
+                    lastDate: DateTime(2099),
+                  );
+                  if (pickedDate != null) {
+                    dateController.text = DateFormat(
+                      'yyyy-MM-dd',
+                    ).format(pickedDate);
+                  }
+                },
               ),
               //Dimas (input detail)
-              SizedBox(height: 10),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: TextFormField(
-                  controller: detailController,
-                  decoration: InputDecoration(
-                    border: UnderlineInputBorder(),
-                    labelText: "Detail",
-                  ),
+              SizedBox(height: 20),
+              Text(
+                "Catatan Tambahan",
+                style: GoogleFonts.montserrat(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-              SizedBox(height: 25),
-              Center(
+              SizedBox(height: 8),
+              TextField(
+                controller: detailController,
+                decoration: InputDecoration(
+                  hintText: "Contoh: Makan Siang",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  prefixIcon: Icon(Icons.description),
+                ),
+              ),
+
+              SizedBox(height: 40),
+              //Dimas (save button)
+              SizedBox(
+                width: double.infinity,
+                height: 50,
                 child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue[700],
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
                   onPressed: () async {
-                    (widget.transactionWithCategory == null)
-                        ? insert(
-                            int.parse(amountController.text),
-                            DateTime.parse(dateController.text),
-                            detailController.text,
-                            selectedCategory!.id,
-                          )
-                        : await update(
-                            widget.transactionWithCategory!.transaction.id,
-                            int.parse(amountController.text),
-                            selectedCategory!.id,
-                            DateTime.parse(dateController.text),
-                            detailController.text,
-                          );
-                    setState(() {});
+                    if (selectedCategory == null) return;
+
+                    if (widget.transactionWithCategory == null) {
+                      await insert(
+                        int.parse(amountController.text),
+                        DateTime.parse(dateController.text),
+                        detailController.text,
+                        selectedCategory!.id,
+                      );
+                    } else {
+                      await update(
+                        widget.transactionWithCategory!.transaction.id,
+                        int.parse(amountController.text),
+                        selectedCategory!.id,
+                        DateTime.parse(dateController.text),
+                        detailController.text,
+                      );
+                    }
                     Navigator.pop(context, true);
                   },
-                  child: Text("Save"),
+                  child: Text(
+                    "Simpan Transaksi",
+                    style: GoogleFonts.montserrat(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
             ],

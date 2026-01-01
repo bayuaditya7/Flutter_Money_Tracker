@@ -21,7 +21,6 @@ class _MainPageState extends State<MainPage> {
   //Dimas
   @override
   void initState() {
-    // TODO: implement initState
     updateView(0, DateTime.now());
     super.initState();
   }
@@ -48,7 +47,7 @@ class _MainPageState extends State<MainPage> {
     return Scaffold(
       appBar: (currentIndex == 0)
           ? CalendarAppBar(
-              accent: Colors.green,
+              accent: Colors.blue,
               backButton: false,
               locale: 'id',
               onDateChanged: (value) {
@@ -65,6 +64,7 @@ class _MainPageState extends State<MainPage> {
             )
           : PreferredSize(
               child: Container(
+                color: Colors.white,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
                     vertical: 36,
@@ -90,8 +90,9 @@ class _MainPageState extends State<MainPage> {
                   setState(() {});
                 });
           },
-          backgroundColor: Colors.lightGreen,
-          child: Icon(Icons.add),
+          backgroundColor: Colors.blue,
+          child: Icon(Icons.add, size: 40, color: Colors.white),
+          shape: CircleBorder(),
         ),
       ),
       body: _children[currentIndex],
@@ -100,26 +101,21 @@ class _MainPageState extends State<MainPage> {
         shape: const CircularNotchedRectangle(),
         notchMargin: 8,
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 30),
-              child: IconButton(
+            IconButton(
                 onPressed: () {
                   updateView(0, DateTime.now());
                 },
-                icon: const Icon(Icons.home),
+                icon: Icon(Icons.home, size: 40, color: currentIndex == 0 ? Colors.blue : Colors.grey),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(right: 30),
-              child: IconButton(
+              SizedBox(width: 40), 
+              IconButton(
                 onPressed: () {
                   updateView(1, null);
                 },
-                icon: const Icon(Icons.list),
+                icon: Icon(Icons.list, size: 40, color: currentIndex == 1 ? Colors.blue : Colors.grey),
               ),
-            ),
           ],
         ),
       ),
