@@ -1,5 +1,6 @@
 import 'package:drift/drift.dart';
 
+// bayu table category
 @DataClassName('Category')
 class Categories extends Table {
   IntColumn get id => integer().autoIncrement()();

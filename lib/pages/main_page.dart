@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:money_tracker/pages/home_page.dart';
 import 'package:money_tracker/pages/category_page.dart';
 import 'package:money_tracker/pages/transaction_page.dart';
+import 'package:money_tracker/pages/budget_page.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({Key? key}) : super(key: key);
@@ -18,29 +19,25 @@ class _MainPageState extends State<MainPage> {
   late List<Widget> _children;
   late int currentIndex;
 
-  //Dimas
   @override
   void initState() {
     updateView(0, DateTime.now());
     super.initState();
   }
-  //Dimas end
 
-  //Dimas (update view)
   void updateView(int index, DateTime? date) {
     setState(() {
       if (date != null) {
         selectedDate = DateTime.parse(DateFormat('yyyy-MM-dd').format(date));
       }
-
       currentIndex = index;
       _children = [
         HomePage(selectedDate: selectedDate),
         CategoryPage(),
+        BudgetPage(),
       ];
     });
   }
-  //Dimas end
 
   @override
   Widget build(BuildContext context) {
@@ -51,13 +48,10 @@ class _MainPageState extends State<MainPage> {
               backButton: false,
               locale: 'id',
               onDateChanged: (value) {
-                //Dimas start(update view)
                 setState(() {
-                //print('SELECTED DATE ' + value.toString());
-                selectedDate = value;
-                updateView(0, selectedDate);
+                  selectedDate = value;
+                  updateView(0, selectedDate);
                 });
-                //Dimas end
               },
               firstDate: DateTime.now().subtract(Duration(days: 140)),
               lastDate: DateTime.now(),
@@ -71,7 +65,7 @@ class _MainPageState extends State<MainPage> {
                     horizontal: 16,
                   ),
                   child: Text(
-                    'Categories',
+                    (currentIndex == 1) ? 'Categories' : 'Budget',
                     style: GoogleFonts.montserrat(fontSize: 20),
                   ),
                 ),
@@ -79,12 +73,15 @@ class _MainPageState extends State<MainPage> {
               preferredSize: Size.fromHeight(100),
             ),
       floatingActionButton: Visibility(
-        visible: (currentIndex == 0) ? true : false,
+        visible: (currentIndex == 0),
         child: FloatingActionButton(
           onPressed: () {
             Navigator.of(context)
                 .push(
-                  MaterialPageRoute(builder: (context) => TransactionPage(transactionWithCategory: null,)),
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        TransactionPage(transactionWithCategory: null),
+                  ),
                 )
                 .then((value) {
                   setState(() {});
@@ -95,27 +92,32 @@ class _MainPageState extends State<MainPage> {
           shape: CircleBorder(),
         ),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       body: _children[currentIndex],
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
         shape: const CircularNotchedRectangle(),
         notchMargin: 8,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            IconButton(
+            Padding(
+              padding: const EdgeInsets.only(left: 30),
+              child: IconButton(
                 onPressed: () {
                   updateView(0, DateTime.now());
                 },
                 icon: Icon(Icons.home, size: 40, color: currentIndex == 0 ? Colors.blue : Colors.grey),
               ),
-              SizedBox(width: 40), 
-              IconButton(
+            ),
+            Padding(
+              padding: const EdgeInsets.only(right: 30),
+              child: IconButton(
                 onPressed: () {
-                  updateView(1, null);
+                  updateView(2, null);
                 },
-                icon: Icon(Icons.list, size: 40, color: currentIndex == 1 ? Colors.blue : Colors.grey),
+                icon: const Icon(Icons.list),
               ),
+            ),
           ],
         ),
       ),

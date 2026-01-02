@@ -131,138 +131,88 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
 
-                    // LIST TRANSACTION
-                    // if-else biasa karena snapshot sudah diambil di atas
-                    if (snapshot.hasData && snapshot.data!.isNotEmpty)
-                      ListView.builder(
-                        physics: NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        itemCount: snapshot.data!.length,
-                        itemBuilder: (context, index) {
-                          bool isExpense =
-                              snapshot.data![index].category.type == 2;
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 8,
-                            ),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(16),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.grey.withOpacity(0.05),
-                                    blurRadius: 10,
-                                    offset: Offset(0, 4),
-                                  ),
-                                ],
-                              ),
-                              child: ListTile(
-                                contentPadding: EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 8,
-                                ),
-                                leading: Container(
-                                  padding: EdgeInsets.all(10),
-                                  decoration: BoxDecoration(
-                                    color: isExpense
-                                        ? Colors.red.withOpacity(0.1)
-                                        : Colors.green.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Icon(
-                                    isExpense ? Icons.upload : Icons.download,
-                                    color: isExpense
-                                        ? Colors.red
-                                        : Colors.green,
-                                    size: 24,
-                                  ),
-                                ),
-                                title: Text(
-                                  formatter.format(
-                                    snapshot.data![index].transaction.amount,
-                                  ),
-                                  style: GoogleFonts.montserrat(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 15,
-                                  ),
-                                ),
-                                subtitle: Text(
-                                  "${snapshot.data![index].category.name} (${snapshot.data![index].transaction.name})",
-                                  style: GoogleFonts.montserrat(
-                                    fontSize: 12,
-                                    color: Colors.grey[600],
-                                  ),
-                                ),
-                                trailing: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    IconButton(
-                                      icon: Icon(
-                                        Icons.edit,
-                                        color: Colors.grey[400],
-                                        size: 20,
-                                      ),
-                                      onPressed: () {
-                                        Navigator.of(context)
-                                            .push(
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    TransactionPage(
-                                                      transactionWithCategory:
-                                                          snapshot.data![index],
-                                                    ),
+                      // LIST TRANSACTION
+                      // if-else biasa karena snapshot sudah diambil di atas
+                      if (snapshot.hasData && snapshot.data!.length > 0)
+                        ListView.builder(
+                          physics: NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          itemCount: snapshot.data!.length,
+                          itemBuilder: (context, index) {
+                            return Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Card(
+                                elevation: 10,
+                                child: ListTile(
+                                  trailing: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      IconButton(
+                                          icon: Icon(Icons.delete),
+                                          onPressed: () async {
+                                            await database
+                                                .deleteTransactionRepo(
+                                                    snapshot.data![index]
+                                                        .transaction.id);
+                                            setState(() {});
+                                          }),
+                                      SizedBox(width: 10),
+                                      IconButton(
+                                        icon: Icon(Icons.edit),
+                                        onPressed: () async {
+                                          await Navigator.of(context).push(
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  TransactionPage(
+                                                transactionWithCategory:
+                                                    snapshot.data![index],
                                               ),
-                                            )
-                                            .then((_) => setState(() {}));
-                                      },
-                                    ),
-                                    IconButton(
-                                      icon: Icon(
-                                        Icons.delete,
-                                        color: Colors.red[300],
-                                        size: 20,
+                                            ),
+                                          );
+                                          setState(() {});
+                                        },
                                       ),
-                                      onPressed: () async {
-                                        await database.deleteTransactionRepo(
-                                          snapshot.data![index].transaction.id,
-                                        );
-                                        setState(() {});
-                                      },
+                                    ],
+                                  ),
+                                  title: Text(
+                                    "Rp. ${snapshot.data![index].transaction.amount.toString()}",
+                                  ),
+                                  subtitle: Text(
+                                    snapshot.data![index].category.name +
+                                        "(" +
+                                        snapshot.data![index].transaction.name +
+                                        ")",
+                                  ),
+                                  leading: Container(
+                                    child: (snapshot.data![index].category
+                                                .type ==
+                                            2)
+                                        ? Icon(
+                                            Icons.upload,
+                                            color: Colors.red,
+                                          )
+                                        : Icon(Icons.download,
+                                            color: Colors.green),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(8),
                                     ),
-                                  ],
+                                  ),
                                 ),
                               ),
-                            ),
-                          );
-                        },
-                      )
-                    else
-                      Center(
-                        child: Column(
-                          children: [
-                            SizedBox(height: 50),
-                            Icon(
-                              Icons.assignment_outlined,
-                              color: Colors.grey[300],
-                              size: 80,
-                            ),
-                            SizedBox(height: 20),
-                            Text(
-                              'Belum ada transaksi',
-                              style: GoogleFonts.montserrat(
-                                color: Colors.grey[500],
-                              ),
-                            ),
-                          ],
+                            );
+                          },
+                        )
+                      else
+                        Center(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 20),
+                            child: Text('Tidak ada transaksi yang ditemukan'),
+                          ),
                         ),
-                      ),
-                    SizedBox(height: 80),
-                  ],
-                );
-              },
-            ),
+                    ],
+                  );
+                }),
           ],
         ),
       ),

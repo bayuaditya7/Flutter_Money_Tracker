@@ -1,5 +1,5 @@
 import 'package:drift/drift.dart';
-
+//bayu
 class Transactions extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text().withLength(max: 128)();
