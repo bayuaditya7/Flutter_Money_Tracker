@@ -109,13 +109,19 @@ class _MainPageState extends State<MainPage> {
                 icon: Icon(Icons.home, size: 40, color: currentIndex == 0 ? Colors.blue : Colors.grey),
               ),
             ),
+            IconButton(
+              onPressed: () {
+                updateView(1, null);
+              },
+              icon: const Icon(Icons.list),
+            ),
             Padding(
               padding: const EdgeInsets.only(right: 30),
               child: IconButton(
                 onPressed: () {
                   updateView(2, null);
                 },
-                icon: const Icon(Icons.list),
+                icon: const Icon(Icons.pie_chart),
               ),
             ),
           ],
