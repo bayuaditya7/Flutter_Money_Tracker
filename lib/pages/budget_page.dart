@@ -23,14 +23,14 @@ class _BudgetPageState extends State<BudgetPage> {
     super.initState();
     final now = DateTime.now();
     periodStart = DateTime(now.year, now.month, 1);
-    periodEnd = DateTime(now.year, now.month + 1, 0); // last day of month
+    periodEnd = DateTime(now.year, now.month + 1, 0); //hari terakhir bulan ini
   }
 
   String get periodLabel =>
       "${DateFormat('MMM yyyy', 'id').format(periodStart)}";
 
   Future<void> pickMonth() async {
-    // simple: pakai datePicker lalu normalize ke month
+    //pakai datePicker lalu normalize ke month start & end
     final picked = await showDatePicker(
       context: context,
       initialDate: periodStart,
@@ -53,7 +53,7 @@ class _BudgetPageState extends State<BudgetPage> {
 
     Category? selectedCategory;
 
-    // load expense categories
+    //load expense categories
     final expenseCategories = await database.getAllCategoryRepo(2);
     if (expenseCategories.isEmpty) {
       if (!mounted) return;
@@ -219,7 +219,7 @@ class _BudgetPageState extends State<BudgetPage> {
                     final progress = (pct / 100).clamp(0.0, 1.0);
 
                     final over = item.spent > item.budget.amount;
-                    final barColor = over ? Colors.red : Colors.green;
+                    final barColor = over ? Colors.red : Colors.blue;
 
                     return Padding(
                       padding: const EdgeInsets.symmetric(

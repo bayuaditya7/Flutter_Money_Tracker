@@ -106,14 +106,14 @@ class _MainPageState extends State<MainPage> {
                 onPressed: () {
                   updateView(0, DateTime.now());
                 },
-                icon: Icon(Icons.home, size: 40, color: currentIndex == 0 ? Colors.blue : Colors.grey),
+                icon: Icon(Icons.home, size: 30, color: currentIndex == 0 ? Colors.blue : Colors.grey),
               ),
             ),
             IconButton(
               onPressed: () {
                 updateView(1, null);
               },
-              icon: const Icon(Icons.list),
+              icon: Icon(Icons.list, size: 30, color: currentIndex == 1 ? Colors.blue : Colors.grey),
             ),
             Padding(
               padding: const EdgeInsets.only(right: 30),
@@ -121,7 +121,7 @@ class _MainPageState extends State<MainPage> {
                 onPressed: () {
                   updateView(2, null);
                 },
-                icon: const Icon(Icons.pie_chart),
+                icon: Icon(Icons.pie_chart, size: 30, color: currentIndex == 2 ? Colors.blue : Colors.grey),
               ),
             ),
           ],
