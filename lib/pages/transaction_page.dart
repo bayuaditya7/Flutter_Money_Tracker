@@ -5,6 +5,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:money_tracker/models/database.dart';
 import 'package:money_tracker/models/transaction_with_category.dart';
+//import api duitku
+import 'package:url_launcher/url_launcher.dart'; 
+import 'package:money_tracker/services/duitku_service.dart';
 
 class TransactionPage extends StatefulWidget {
   final TransactionWithCategory? transactionWithCategory;
@@ -18,6 +21,10 @@ class TransactionPage extends StatefulWidget {
 class _TransactionPageState extends State<TransactionPage> {
   final AppDb database = AppDb();
   bool isExpense = true;
+  // Tambahkan instance service
+  final DuitkuService duitkuService = DuitkuService();
+  bool isPaymentLoading = false;
+
   late int type;
   List<String> list = ['Makan dan Jajan', 'Transportasi', 'Nonton Film'];
   late String dropDownValue = list.first;
@@ -68,6 +75,46 @@ class _TransactionPageState extends State<TransactionPage> {
       transaction_date,
       nameDetail,
     );
+  }
+
+  //method handle pembayaran API duiku
+  Future<void> _processPayment() async {
+    if (amountController.text.isEmpty || selectedCategory == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Harap isi jumlah dan kategori")),
+      );
+      return;
+    }
+
+    setState(() {
+      isPaymentLoading = true;
+    });
+
+    // Panggil service Duitku
+    String? paymentUrl = await duitkuService.createPayment(
+      amount: int.parse(amountController.text),
+      productDetail: detailController.text.isEmpty ? "Transaksi" : detailController.text,
+      email: "test091732@mail.com",
+      phoneNumber: "08123412029",
+    );
+
+    setState(() {
+      isPaymentLoading = false;
+    });
+
+    if (paymentUrl != null) {
+      // Buka halaman pembayaran Duitku
+      final Uri url = Uri.parse(paymentUrl);
+      if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Gagal membuka halaman pembayaran")),
+        );
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Gagal membuat transaksi pembayaran")),
+      );
+    }
   }
   //Dimas end
 
@@ -315,6 +362,36 @@ class _TransactionPageState extends State<TransactionPage> {
               ),
 
               SizedBox(height: 40),
+              
+              //Dimas (button bayar duitku)
+                if (isExpense) ...[
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(color: Colors.green),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    onPressed: isPaymentLoading ? null : _processPayment,
+                    icon: isPaymentLoading 
+                        ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)) 
+                        : Icon(Icons.payment, color: Colors.green),
+                    label: Text(
+                      "Bayar via Duitku",
+                      style: GoogleFonts.montserrat(
+                        color: Colors.green,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 16), // Jarak antar tombol
+              ],
+
               //Dimas (save button)
               SizedBox(
                 width: double.infinity,
