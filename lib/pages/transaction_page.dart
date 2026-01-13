@@ -77,25 +77,47 @@ class _TransactionPageState extends State<TransactionPage> {
     );
   }
 
+  //method payment duitku
+  final Map<String, String> paymentMethods = {
+    'VC': 'Kartu Kredit (Visa/Master)',
+    'BC': 'BCA Virtual Account',
+    'M2': 'Mandiri Virtual Account',
+    'SP': 'ShopeePay / QRIS', 
+  };
+
+  String selectedPaymentCode = 'VC';
+
   //method handle pembayaran API duiku
-  Future<void> _processPayment() async {
-    if (amountController.text.isEmpty || selectedCategory == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Harap isi jumlah dan kategori")),
+Future<void> _processPayment() async {
+    setState(() => isPaymentLoading = true);
+
+    try {
+      String uniqueEmail = "test_${DateTime.now().millisecondsSinceEpoch}@mail.com";
+      
+      // Panggil Service dengan parameter paymentMethod
+      String paymentUrl = await duitkuService.createPayment(
+        amount: int.parse(amountController.text),
+        productDetail: detailController.text.isEmpty ? "Transaksi" : detailController.text,
+        email: uniqueEmail,
+        phoneNumber: "08123456789",
+        paymentMethod: selectedPaymentCode,
       );
-      return;
+    } catch (e) {
+    } finally {
+      setState(() => isPaymentLoading = false);
     }
 
-    setState(() {
-      isPaymentLoading = true;
-    });
+
+    String uniqueId = DateTime.now().millisecondsSinceEpoch.toString();
+    String uniqueEmail = "user_$uniqueId@mail.com";
 
     // Panggil service Duitku
     String? paymentUrl = await duitkuService.createPayment(
       amount: int.parse(amountController.text),
       productDetail: detailController.text.isEmpty ? "Transaksi" : detailController.text,
-      email: "test091732@mail.com",
-      phoneNumber: "08123412029",
+      email: uniqueEmail,
+      phoneNumber: "08123456789",
+      paymentMethod: selectedPaymentCode,
     );
 
     setState(() {
@@ -362,6 +384,48 @@ class _TransactionPageState extends State<TransactionPage> {
               ),
 
               SizedBox(height: 40),
+
+              if (isExpense) ...[
+                Text(
+                  "Metode Pembayaran",
+                  style: GoogleFonts.montserrat(
+                    fontSize: 14, 
+                    fontWeight: FontWeight.w600
+                  ),
+                ),
+                SizedBox(height: 8),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      value: selectedPaymentCode,
+                      isExpanded: true,
+                      items: paymentMethods.entries.map((entry) {
+                        return DropdownMenuItem<String>(
+                          value: entry.key,
+                          child: Row(
+                            children: [
+                              Icon(Icons.payment, color: Colors.blue, size: 20),
+                              SizedBox(width: 10),
+                              Text(entry.value, style: GoogleFonts.montserrat()),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          selectedPaymentCode = value!;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+                SizedBox(height: 20),
+              ],
               
               //Dimas (button bayar duitku)
                 if (isExpense) ...[
