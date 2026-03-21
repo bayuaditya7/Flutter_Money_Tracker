@@ -1,4 +1,4 @@
-💰 Money Tracker App (Flutter)
+💰 Money Tracker App
 
 A modern personal finance management app built with Flutter, designed to help users track income, manage expenses, and control spending through a customizable budget system.
 
